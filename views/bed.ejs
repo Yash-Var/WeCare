@@ -1,0 +1,170 @@
+<!-- <%- include('partials/header'); -%> -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <link rel="stylesheet" href="/css/bed.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <title>Medi Hub</title>
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/512/2966/2966327.png"
+      type="image/x-icon"
+    />
+    <style>
+      .btn {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        padding-left: 1rem;
+        border: var(--border);
+        border-radius: 0.5rem;
+        box-shadow: var(--box-shadow);
+        color: var(--color);
+        cursor: pointer;
+        font-size: 1.7rem;
+        background: #fff;
+      }
+
+      .btn:hover {
+        background: var(--color);
+        color: #fff;
+      }
+      .yash {
+        margin-top: 2.2rem;
+        margin-left: 2rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--header-->
+    <header class="header">
+      <a href="/" class="logo"> <i class="fas fa-heartbeat"></i>Medi Hub</a>
+
+      <nav class="navbar">
+        <% if (user) { %>
+        <a>Welcome, <%= user.email %></a>
+        <a href="/">Home</a>
+        <a href="/logout">Log out</a>
+        <% } %>
+      </nav>
+
+      <div id="menu" class="fas fa-bars"></div>
+    </header>
+
+    <div class="row">
+      <div class="column">
+        <img
+          id="bed-img"
+          src="../assets/Sick patient in bed vector.jpg"
+          alt=""
+        /><br />
+      </div>
+
+      <div class="column">
+        <form action="/bed" id="register" method="post">
+          <h2>Book Bed</h2>
+
+          <label for="">Name :</label>
+          <br />
+          <input type="text" id="name" placeholder="Enter your full name" />
+          <br />
+          <label for="">Email :</label><br />
+          <input type="email" id="email" placeholder="abcdef@gamil.com" />
+          <br />
+          <label for="">Phone Number :</label><br />
+          <input type="tel" id="phone" placeholder="Enter your phone number" />
+          <br />
+          <label for="">City :</label><br />
+          <input
+            type="text"
+            id="city"
+            placeholder="Enter your preferred city (e.g. Indore)"
+          />
+          <br />
+
+          <label for="">Gender :</label><br />
+          <input name="Gender" id="gender" type="radio" value="Male" /> Male
+          <input name="Gender" type="radio" value="Female" />Female
+          <input name="Gender" type="radio" value="Others" />Others <br /><br />
+          Select Blood Group : <br />
+
+          <input
+            name="Blood Group"
+            list="blood group"
+            placeholder="Blood Group"
+          />
+          <datalist id="blood group">
+            <option>A Positive</option>
+            <option>A Negative</option>
+            <option>B Positive</option>
+            <option>B Negative</option>
+            <option>AB Positive</option>
+            <option>AB Negative</option>
+            <option>O Positive</option>
+            <option>O Negative</option>
+            <option>Unknown</option>
+          </datalist>
+          <br />
+        </form>
+
+        <input type="submit" value="Check Bed availability" id="submitButton" />
+      </div>
+      <div id="results" class="container mb-5"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("submitButton")
+        .addEventListener("click", fetchBedData);
+      const result = document.getElementById("results");
+      const button = document.getElementById("submitButton");
+
+      function fetchBedData() {
+        const form = document.getElementById("register").elements;
+        const url =
+          "https://api.rootnet.in/covid19-in/hospitals/medical-colleges";
+        const prefCity = form.city.value;
+        const recvEmail = form.email.value;
+        const city = prefCity.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
+          letter.toUpperCase()
+        );
+        console.log(city);
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((json) => {
+            console.log(json);
+
+            var Beds = "<html>";
+
+            for (let x of json.data.medicalColleges) {
+              if (x.city === city) {
+                result.style.display = "inline";
+                Beds +=
+                  "<h4 class='yash'>" +
+                  x.name +
+                  "</h4><h6 class='yash'>HospitalBeds: " +
+                  x.hospitalBeds +
+                  "</h6><br/>";
+              } else if (city == "") {
+                swal("Error !", "Please Enter city", "error");
+              } else {
+                result.innerHTML += "Sorry! No Data Available ";
+              }
+            }
+            Beds += "</html>";
+            console.log(Beds);
+            result.innerHTML = "<h1>Available Beds:</h1>" + Beds;
+          });
+      }
+    </script>
+  </body>
+</html>
